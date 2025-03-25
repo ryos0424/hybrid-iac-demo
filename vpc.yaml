@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Hybrid構成用のVPCスタック"
+
+Resources:
+  HybridVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.1.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: HybridDemoVPC
+
+  HybridSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref HybridVPC
+      CidrBlock: 10.1.1.0/24
+      AvailabilityZone: ap-northeast-1a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: HybridDemoSubnet
+
+  HybridInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: HybridDemoIGW
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref HybridVPC
+      InternetGatewayId: !Ref HybridInternetGateway
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref HybridVPC
+      Tags:
+        - Key: Name
+          Value: HybridDemoRouteTable
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref HybridInternetGateway
+
+  RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref HybridSubnet
+      RouteTableId: !Ref PublicRouteTable

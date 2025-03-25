@@ -16,7 +16,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref HybridVPC
-      CidrBlock: 10.1.2.0/24
+      CidrBlock: 10.1.1.0/24
       AvailabilityZone: ap-northeast-1a
       MapPublicIpOnLaunch: true
       Tags:
